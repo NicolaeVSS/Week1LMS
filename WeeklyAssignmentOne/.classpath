@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="lib" path="/home/nicolae/Documents/workspace-spring-tool-suite-4-4.4.0.RELEASE/WeeklyAssignmentOne/commons-lang3-3.9/commons-lang3-3.9.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
