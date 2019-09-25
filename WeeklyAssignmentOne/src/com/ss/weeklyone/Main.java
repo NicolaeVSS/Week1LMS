@@ -9,12 +9,13 @@ public class Main
 	public static void main(String[] args) 
 	{
 		DatabaseConnection db = DatabaseConnection.getInstance();
-		
+
 		// Setup our tables
 		db.createTable("Authors",	"authorId", 	"authorName");
 		db.createTable("Publishers","publisherId", 	"publisherName","publisherAddress");
 		db.createTable("Books",		"bookID", 		"authorId", 	"publisherId", 		"bookName");
-		
+
+		// TODO add relationships to header and check if they already exist
 		// Establish relationship between Authors.authorId and Books.authorId
 		int parentTableIndex = db.getTableIndex("Authors");
 		int targetTableIndex = db.getTableIndex("Books");
@@ -31,11 +32,12 @@ public class Main
 		parentFieldIndex = db.getTablesRef().get(parentTableIndex).getFieldIndex("publisherId");
 		targetFieldIndex = db.getTablesRef().get(targetTableIndex).getFieldIndex("publisherId");
 		db.addRelationship(parentTableIndex, targetTableIndex, parentFieldIndex, targetFieldIndex, RelationType.ONETOMANY);
-		
+
 		// Establish relationship between Books.pubisherId and Publisher.publisherId (the reverse of the previous relation)
 		db.addRelationship(targetTableIndex, parentTableIndex, targetFieldIndex, parentFieldIndex, RelationType.MANYTOONE);
 		
 		// TODO verify relationships
+		System.out.println("Authors is related to: " + Arrays.toString(db.getTablesRef().get(db.getTableIndex("Authors")).getRelationships().toArray()));
 		
 		// TODO Insert some testing data
 

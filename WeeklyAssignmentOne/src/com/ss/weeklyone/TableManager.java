@@ -20,6 +20,7 @@ public class TableManager
 	public TableManager(String tableName, String primaryKey, String[] fields) 
 	{
 		// Building the file header
+		// TODO add relationships to the file header
 		fields = ArrayUtils.addAll(new String[] {primaryKey}, fields); 
 		String fieldsConverted = Arrays.toString(fields); // gives us bracket encased csv's which we can substring to make our header
 		fieldsConverted = fieldsConverted.substring(1, fieldsConverted.length()-1); // removing the brackets
