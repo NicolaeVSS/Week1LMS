@@ -26,6 +26,7 @@ public abstract class Table
 	
 	public void clearTable() throws IOException 
 	{
+		// TODO consider making a backup copy of the file
 		if(table.delete())
 		{
 		    table.createNewFile();

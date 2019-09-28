@@ -1,13 +1,8 @@
 package com.ss.service;
 
 import java.util.*;
-
 import org.apache.commons.lang3.ArrayUtils;
-
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
-
 import com.ss.dataaccess.*;
 import com.ss.dataobjects.*;
 import com.ss.exception.ImproperDaoNameException;
@@ -223,31 +218,94 @@ public class Service
 	{
 		try 
 		{
-			DataAccessObject targetDao = identifyDao(tableName);
-			ArrayList<ArrayList<String>> targetDaoData = targetDao.getTableData();
+			DataAccessObject targetDao = identifyDao(tableName); // this'll throw an exception if it cant resolve which DAO to use meaning tableName is safe to use for the rest oft he function 
+			ArrayList<ArrayList<String>> data = targetDao.getTableData();
 			
-			int innerSize;
-			for(int i = 0; i < targetDaoData.size(); ++i) 
+			ArrayList<ArrayList<String>> queryResult;
+			if(DataAccessObject.compare(targetDao, authors)) 
 			{
-				innerSize = targetDaoData.get(i).size();
-				
-				// go row by row until the queryResult[0].equals(enteredFields[0]) AKA a primary key match
-				if(targetDaoData.get(i).get(0).equals(enteredFields[0])) 
+				if("".equals(enteredFields[0])) 
 				{
-					// then change the values on that row to the values in entered fields, EXCLUDING THE PRIMARY KEY so queryResult[1]'s row  = enteredFields[1+]
-					for(int j = 1; j < Math.min(innerSize, enteredFields.length); ++j) 
-					{
-						targetDaoData.get(i).set(j, enteredFields[j]);
-					}
-					targetDao.overwriteTable(targetDaoData);
+					System.out.println("You must enter an authorId to update an author.\nNo operation was done.");
+					return;
 				}
+				
+				overwriteListWhereIndexZeroMatches(data, enteredFields);
+				targetDao.overwriteTable(data);
+			}
+			else if(DataAccessObject.compare(targetDao, publishers))
+			{
+				if("".equals(enteredFields[0])) 
+				{
+					System.out.println("You must enter a publisherId to update a publisher.\nNo operation was done.");
+					return;
+				}
+
+				overwriteListWhereIndexZeroMatches(data, enteredFields);
+				targetDao.overwriteTable(data);
+			}
+			else if(DataAccessObject.compare(targetDao, books)) 
+			{
+				if("".equals(enteredFields[0])) 
+				{
+					System.out.println("You must enter a BookId to update a book.\nNo operation was done.");
+					return;
+				}
+
+				ArrayList<ArrayList<String>>  targetBookData = queryTable(books.getTableName(), enteredFields[0]);
+				String targetBookCurrentAuthor = "";
+				String targetBookCurrentPublisher = ""; 
+				
+				// does the author exist? if so get the data needed to identify corresponding entries in Authors and Publishers
+				if(targetBookData.size() == 1 && targetBookData.get(0).size() > 3) 
+				{
+					targetBookCurrentAuthor = targetBookData.get(0).get(1);
+					targetBookCurrentPublisher = targetBookData.get(0).get(2);
+					
+					System.out.println("Book selected: " + targetBookData.get(0).get(1));
+					System.out.println("corresponding author:" + targetBookCurrentAuthor);
+					System.out.println("corresponding publisher: " + targetBookCurrentPublisher);
+				}
+				else 
+				{
+					System.out.println("No unique bookId row exists with authorId " + enteredFields[0] + " in Books.\nNo operation was done.");
+					return;
+				}
+				
+				// get the corresponding data from Authors table
+				ArrayList<ArrayList<String>>  targetBookAuthorsData = queryTable(authors.getTableName(), new String[] {enteredFields.length>1 ?  enteredFields[1] : targetBookCurrentAuthor});
+				System.out.println("Book entry for author " + targetBookCurrentAuthor);
+				System.out.println(make2DArrayListLegible(targetBookAuthorsData));
+				
+				// when updating a book the new auhtorId must exist in Authors and have an authorId
+				if(!(targetBookAuthorsData.size() == 1 && targetBookAuthorsData.get(0).size() > 1)) 
+				{
+					System.out.println("No unique authorId row exists with authorId " + (enteredFields.length>1 ?  enteredFields[1] : targetBookCurrentAuthor) + " in Authors.\nNo operation was done.");
+					return;
+				}
+				
+				// get corresponding data from publishers table
+				ArrayList<ArrayList<String>>  targetBookPublishersData = queryTable(publishers.getTableName(), new String[] {enteredFields.length>2 ?  enteredFields[2] : targetBookCurrentPublisher});
+				System.out.println("Book entry for publisher " + targetBookCurrentPublisher);
+				System.out.println(make2DArrayListLegible(targetBookPublishersData));
+				
+				// when updating a book the new publisherId must exist in Publishers
+				if(!(targetBookPublishersData.size() == 1 && targetBookPublishersData.get(0).size() > 1))
+				{
+					System.out.println("No unique publisherId row exists with publisherId " + (enteredFields.length>2 ?  enteredFields[2] : targetBookCurrentPublisher) + " in Publishers.\nNo operation was done.");
+					return;
+				}
+				
+				// FINALLY, if the bookId exists, authorId and publisherId have corresponding unique entries, delete the book.
+				overwriteListWhereIndexZeroMatches(data, enteredFields);
+				targetDao.overwriteTable(data);
 			}
 		} 
 		catch (ImproperDaoNameException e) 
 		{
 			System.out.println("No operation was done.");
 			e.printStackTrace();
-		} 
+		}
 		catch (IOException e) 
 		{
 			// TODO Auto-generated catch block
@@ -256,7 +314,6 @@ public class Service
 	}
 	
 	//DELETE
-	// TODO resolve unexpected behaviour, try removing author 2 
 	public void removeEntry(String tableName, String ...enteredFields) 
 	{
 		try 
@@ -272,13 +329,11 @@ public class Service
 					return;
 				}
 				
-				System.out.println("BOOKS:");
 				// When deleting an author, also delete all the books with matching authorId
 				// sending empty string since the first field is the bookId and THEN authorId
 				queryResult = queryTableComplement(true, "Books", new String[] {"",enteredFields[0]});
-				targetDao.overwriteTable(queryResult);
-				
-				System.out.println("\nAUTHORS:");
+				books.overwriteTable(queryResult);
+
 				// Then delete the entry in the Authors table
 				queryResult = queryTableComplement(true, tableName, enteredFields[0]);
 				targetDao.overwriteTable(queryResult);
@@ -294,7 +349,7 @@ public class Service
 				// When deleting a publisher, also delete all the books with matching publisherId
 				// sending empty strings since the first field is the bookId and authorId and THEN publisherId
 				queryResult = queryTableComplement(true, "Books", new String[] {"","",enteredFields[0]});
-				targetDao.overwriteTable(queryResult);
+				books.overwriteTable(queryResult);
 				
 				// Then delete the entry in the Publishers table
 				queryResult = queryTableComplement(true, tableName, enteredFields[0]);
@@ -323,12 +378,30 @@ public class Service
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-		
 	}
 	
-	// returns a primary key value that doesnt exist in the current table
-	// TODO AUTOMATICALLY 
+	// if any row's zeroth element equals enteredFields, overwrite that row with any NEW DATA enteredFields, empty strings and missing fields will be left the same
+	private void overwriteListWhereIndexZeroMatches(ArrayList<ArrayList<String>> tableData,String ...enteredFields) 
+	{
+		for(int i = 0; i < tableData.size(); ++i) 
+		{
+			if(tableData.get(i).get(0) != null && tableData.get(i).get(0).equals(enteredFields[0])) 
+			{
+				for(int j = 0; j < enteredFields.length; ++j) 
+				{
+					// leave empty fields alone, only replace with new data
+					if("".equals(enteredFields[j]))
+					{
+						continue;
+					}
+					
+					tableData.get(i).set(j, enteredFields[j]);
+				}
+			}
+		}
+	}
+	
+	// returns a primary key value that doesnt exist in the targetDao's table
 	private String generateUniquePrimaryKey(DataAccessObject myDao) throws NumberFormatException, IOException
 	{
 		List<Integer> keys = new ArrayList<Integer>();
@@ -388,6 +461,7 @@ public class Service
 		return false;
 	}
 
+	// returns a string representation of a 2d array
 	public static String make2DArrayListLegible(ArrayList<ArrayList<String>> input) 
 	{	
 		StringBuilder output = new StringBuilder();
@@ -400,59 +474,4 @@ public class Service
 		
 		return output.toString();
 	}
-	
-//	
-//	private void overwriteTable(Table targetTable, ArrayList<ArrayList<String>> data) 
-//	{
-//		try 
-//		{
-//			// clear the file
-//			// TODO consider making a backup copy of the file
-//			targetTable.clearTable();
-//			
-//			// if the user requested to empty the table, might as well stop here
-//			if(data.size() == 0) 
-//			{
-//				return;
-//			}
-//		} 
-//		catch (IOException e) 
-//		{
-//			System.out.println("Error clearing " + targetTable.getTableName() + " for re-writing");
-//			e.printStackTrace();
-//		}
-//		
-//		try 
-//		{
-//			// Chop off column 0, it is the primary key and primary keys are created automatically, no need to re-enter them
-//			int innerDimensionSize = 0;
-//			
-//			for(int i = 0; i < data.size(); ++i) 
-//			{
-//				innerDimensionSize = data.get(i).size();
-//				
-//				// if the row isnt empty, remove its first element, the primary key
-//				if(!(innerDimensionSize > 0)) 
-//				{
-//					continue;
-//				}
-//				else
-//				{
-//					data.get(i).remove(0); // remove the value at the front
-//				}
-//			}
-//			
-//			// now that the primary key is removed, we can being rebuilding the file and regenerating the primary keys
-//			for(int i = 0; i < data.size(); ++i) 
-//			{
-//				targetTable.appendToTable( data.get(i).toArray(new String[data.get(i).size()]) );
-//			}
-//		} 
-//		catch (ImproperTableNameException | IOException e) 
-//		{
-//			System.out.println("Error writing to " + targetTable.getTableName());
-//			e.printStackTrace();
-//		}
-//	}
-//	
 }
