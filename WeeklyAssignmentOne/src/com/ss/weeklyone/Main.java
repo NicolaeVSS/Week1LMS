@@ -1,15 +1,16 @@
 package com.ss.weeklyone;
 
 import java.util.*;
-import java.io.*;
 
 public class Main 
 {
 
 	public static void main(String[] args) 
-	{
+	{	
 		DatabaseConnection db = DatabaseConnection.getInstance();
 
+		System.err.println("Hello World!");
+		
 		// Setup our tables
 		db.createTable("Authors",	"authorId", 	"authorName");
 		db.createTable("Publishers","publisherId", 	"publisherName","publisherAddress");
@@ -37,7 +38,8 @@ public class Main
 		db.addRelationship(targetTableIndex, parentTableIndex, targetFieldIndex, parentFieldIndex, RelationType.MANYTOONE);
 		
 		// TODO verify relationships
-		System.out.println("Authors is related to: " + Arrays.toString(db.getTablesRef().get(db.getTableIndex("Authors")).getRelationships().toArray()));
+		String arr = Arrays.toString(db.getTablesRef().get(db.getTableIndex("Authors")).getRelationships().toArray());
+		System.out.println("Authors is related to: " + arr);
 		
 		// TODO Insert some testing data
 
