@@ -25,7 +25,9 @@ public abstract class Table
 	{
 		try 
 		{	
-			if(table.createNewFile()) 
+			boolean isFileCreated = table.createNewFile();
+			
+			if(isFileCreated) 
 			{
 				System.out.println("File for " + tableName + " successfully created at " + table.getCanonicalPath());
 			}
@@ -33,7 +35,7 @@ public abstract class Table
 			{
 				System.out.println("File for " + tableName +" already exists at " + table.getCanonicalPath());
 			}
-		} 
+		}
 		catch (IOException e)
 		{
 			System.out.println("Something went wrong creating the file for " + tableName + " at "+ this.filePath);

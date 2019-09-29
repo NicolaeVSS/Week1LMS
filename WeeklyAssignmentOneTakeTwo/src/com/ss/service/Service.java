@@ -175,26 +175,22 @@ public class Service
 				{
 					// if the user sent true, then use the ! operator, otherwise, don't use the ! operator
 					dataComparisonResult = useComplement ? !data.get(i).get(j).equals(enteredFields[j]) : data.get(i).get(j).equals(enteredFields[j]);
-					System.out.println("Comapring: " + data.get(i).get(j) + " to " + enteredFields[j] + "\nResult: " + dataComparisonResult);
 					
 					if(dataComparisonResult || "".equals(enteredFields[j])) 
 					{
 						// this if will only check an individual field in a row
 						rowMatch[j] = true;
-						System.out.println("This element is either empty or a match");
 					}
 					else if (!"".equals(enteredFields[j]))
 					{
 						//but since "boolean match" is around, if we encounter value on the row that doesn't match, we set to false and continue
 						rowMatch[j] = false;
-						System.out.println("This element was not a match");
 						continue;
 					}
 				}
 				// if the entire row was a match aka there is no false entry
 				if(!boolArrayContains(rowMatch, false))
 				{
-					System.out.println("Adding row to output: " + Arrays.toString(data.get(i).toArray()));
 					output.add(data.get(i));
 				}
 				System.out.println();
@@ -261,10 +257,6 @@ public class Service
 				{
 					targetBookCurrentAuthor = targetBookData.get(0).get(1);
 					targetBookCurrentPublisher = targetBookData.get(0).get(2);
-					
-					System.out.println("Book selected: " + targetBookData.get(0).get(1));
-					System.out.println("corresponding author:" + targetBookCurrentAuthor);
-					System.out.println("corresponding publisher: " + targetBookCurrentPublisher);
 				}
 				else 
 				{
@@ -274,8 +266,6 @@ public class Service
 				
 				// get the corresponding data from Authors table
 				ArrayList<ArrayList<String>>  targetBookAuthorsData = queryTable(authors.getTableName(), new String[] {enteredFields.length>1 ?  enteredFields[1] : targetBookCurrentAuthor});
-				System.out.println("Book entry for author " + targetBookCurrentAuthor);
-				System.out.println(make2DArrayListLegible(targetBookAuthorsData));
 				
 				// when updating a book the new auhtorId must exist in Authors and have an authorId
 				if(!(targetBookAuthorsData.size() == 1 && targetBookAuthorsData.get(0).size() > 1)) 
@@ -286,8 +276,6 @@ public class Service
 				
 				// get corresponding data from publishers table
 				ArrayList<ArrayList<String>>  targetBookPublishersData = queryTable(publishers.getTableName(), new String[] {enteredFields.length>2 ?  enteredFields[2] : targetBookCurrentPublisher});
-				System.out.println("Book entry for publisher " + targetBookCurrentPublisher);
-				System.out.println(make2DArrayListLegible(targetBookPublishersData));
 				
 				// when updating a book the new publisherId must exist in Publishers
 				if(!(targetBookPublishersData.size() == 1 && targetBookPublishersData.get(0).size() > 1))
@@ -406,11 +394,16 @@ public class Service
 	{
 		List<Integer> keys = new ArrayList<Integer>();
 		ArrayList<ArrayList<String>> data = myDao.getTableData();
-		String line;
+		//String line;
 		
 		// TODO use streams?
 		for(int i = 0; i < data.size(); ++i) 
 		{
+			if("".equals(data.get(i).get(0))) 
+			{
+				continue;
+			}
+			
 			keys.add(Integer.parseInt(data.get(i).get(0)));
 		}
 		

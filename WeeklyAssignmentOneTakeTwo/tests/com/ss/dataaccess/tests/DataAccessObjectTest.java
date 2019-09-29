@@ -20,13 +20,16 @@ class DataAccessObjectTest
 	static void setUpBeforeClass() throws Exception {}
 
 	@AfterAll
-	static void tearDownAfterClass() throws Exception {}
+	static void tearDownAfterClass() throws Exception 
+	{
+		
+	}
 
 	@Test 
 	final void testAppendToTableAuthorDao() throws ImproperDaoNameException, IOException 
 	{
-		DataAccessObject myDao = new DataAccessAuthors(new AuthorsTable());
-		String[] authorData = new String[] {"My Test Id","My Test Entry"};
+		DataAccessObject myDao = new DataAccessAuthors(new AuthorsTable("./dbFilesTest/Authors.csv"));
+		String[] authorData = new String[] {"1","testAppendToTableAuthorDaoAuthorName"};
 		ArrayList<ArrayList<String>> result;
 
 		myDao.appendToTable(authorData);
@@ -54,7 +57,7 @@ class DataAccessObjectTest
 	@Test
 	final void testOverwriteTable() throws IOException, ImproperDaoNameException 
 	{
-		DataAccessObject myDao = new DataAccessAuthors(new AuthorsTable());
+		DataAccessObject myDao = new DataAccessAuthors(new AuthorsTable("./dbFilesTest/Authors.csv"));
 		ArrayList<ArrayList<String>> previousData = myDao.getTableData();
 
 		// create an arraylist containing what we want to overwrite the file with
