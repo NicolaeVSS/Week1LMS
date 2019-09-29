@@ -193,7 +193,6 @@ public class Service
 				{
 					output.add(data.get(i));
 				}
-				System.out.println();
 			}
 		} 
 		catch (ImproperDaoNameException e) 
