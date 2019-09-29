@@ -35,6 +35,7 @@ class DataAccessObjectTest
 
 		myDao.appendToTable(authorData);
 		result = myDao.getTableData();
+		myDao.overwriteTable(new ArrayList<ArrayList<String>>());
 		
 		for(int i = 0; i < result.size(); ++i) 
 		{
