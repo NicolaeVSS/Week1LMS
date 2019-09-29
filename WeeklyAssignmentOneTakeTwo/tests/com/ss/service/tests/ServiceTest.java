@@ -10,16 +10,15 @@ import org.junit.jupiter.api.Test;
 
 import com.ss.service.Service;
 
-class ServiceTest {
-
+class ServiceTest 
+{
 	@BeforeAll
-	static void setUpBeforeClass() throws Exception {
-	}
+	static void setUpBeforeClass() throws Exception {}
 
 	@AfterAll
-	static void tearDownAfterClass() throws Exception {
-	}
+	static void tearDownAfterClass() throws Exception {}
 
+	// CREATE AND DELETE
 	@Test
 	final void testAddRemoveEntry() {
 		Service myService = Service.getInstance();
@@ -87,5 +86,48 @@ class ServiceTest {
 		}
 		
 	}
-}
-;
+
+	// UPDATE 
+	// TODO test for updating book, ensure the auth and pub exists.
+	@Test
+	final void testUpdateEntry() 
+	{
+		Service myService = Service.getInstance();
+		// Get all data from out Authors table
+		ArrayList<ArrayList<String>> oldData = myService.queryTable("Authors", "");
+		String[] myModifiedData = new String[] {oldData.get(0).get(0), "My New Name"};
+		
+		if(oldData.size() < 1) 
+		{
+			fail("Empty Authors table.");
+		}
+		
+		if(oldData.get(0).size() != 2) 
+		{
+			fail("Malformed data in Authors");
+		}
+		
+		// update the value
+		myService.updateEntry("Authors", myModifiedData);
+		
+		// get the new version of the table and store it
+		ArrayList<ArrayList<String>> newData = myService.queryTable("Authors", myModifiedData);
+		
+		if(newData.size() != 1) 
+		{
+			fail("Couldn't find modified data");
+		}
+		
+		// restore the data to the old value
+		myService.updateEntry("Authors", new String[] {oldData.get(0).get(0), oldData.get(0).get(1)});
+		
+		// compare
+		for(int i = 0; i < newData.get(0).size(); ++i) 
+		{
+			if(!(myModifiedData[i].equals(newData.get(0).get(i)))) 
+			{
+				fail("Data mismatch, update not successful");
+			}
+		}
+	}
+};

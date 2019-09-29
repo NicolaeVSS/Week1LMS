@@ -25,6 +25,7 @@ class DataAccessObjectTest
 		
 	}
 
+	// CREATE TEST
 	@Test 
 	final void testAppendToTableAuthorDao() throws ImproperDaoNameException, IOException 
 	{
@@ -54,6 +55,7 @@ class DataAccessObjectTest
 
 	}
 	
+	// UPDATE AND DELETE TEST
 	@Test
 	final void testOverwriteTable() throws IOException, ImproperDaoNameException 
 	{
