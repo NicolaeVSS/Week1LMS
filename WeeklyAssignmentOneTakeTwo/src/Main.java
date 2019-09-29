@@ -12,7 +12,6 @@ public class Main {
 		String op; // stores the user's desired operation
 		String tableName; // stores the user's target for the desired operation
 		String[] enteredFields; // stores the user's field values to check against in the target table
-		ArrayList<ArrayList<String>> returnedRows; // store the result of a read operation
 		
 		/*
 		// FOR DEBUGGING
@@ -125,7 +124,7 @@ public class Main {
 		Scanner input = new Scanner(System.in);
 
 		System.out.println("Note: *ALL* commas will be interpreted as a new field, and all charachters including spaces are read.");
-		System.out.println("Enter the values (seperated by \",\" spaces included) for the entry you would like to " + op);
+		System.out.println("Enter the values (seperated by \",\") for the entry you would like to " + op);
 		
 		while(input.hasNextLine()) 
 		{

@@ -380,7 +380,7 @@ public class Service
 		}
 	}
 	
-	// if any row's zeroth element equals enteredFields, overwrite that row with any NEW DATA enteredFields, empty strings and missing fields will be left the same
+	// if any row's zeroth element equals enteredFields, overwrite that row with any NEW DATA enteredFields. empty strings and missing fields will be left the same
 	private void overwriteListWhereIndexZeroMatches(ArrayList<ArrayList<String>> tableData,String ...enteredFields) 
 	{
 		for(int i = 0; i < tableData.size(); ++i) 

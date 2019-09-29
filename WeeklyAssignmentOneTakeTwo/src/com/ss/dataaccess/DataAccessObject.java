@@ -14,7 +14,7 @@ import com.ss.exception.ImproperDaoNameException;
 
 public abstract class DataAccessObject 
 {
-	private Table myTable;
+	protected Table myTable;
 	
 	public DataAccessObject(Table myTable) 
 	{
@@ -57,12 +57,11 @@ public abstract class DataAccessObject
 		
 		BufferedReader reader = new BufferedReader(new FileReader(myTable.getFilePath()));
 		
-		// for each line of the file, add it to a 1D ArrayList
-		// then, for each row in the above ArrayList, use split(",") and cast to an ArrayList 
+		// for each line of the file, use split(",") and cast to an ArrayList 
 		// AND THEN add that split/casted row to the data ArrayList to be returned
-		reader.lines().collect(Collectors.toList()).forEach(ele -> 
+		reader.lines().forEach(row -> 
 		{
-			data.add(new ArrayList<String>(Arrays.asList(ele.split(","))));
+			data.add(new ArrayList<String>(Arrays.asList(row.split(","))));
 		});
 		
 		reader.close();
