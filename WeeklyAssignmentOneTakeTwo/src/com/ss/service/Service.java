@@ -217,7 +217,7 @@ public class Service
 			ArrayList<ArrayList<String>> data = targetDao.getTableData();
 			
 			ArrayList<ArrayList<String>> queryResult;
-			if(DataAccessObject.compare(targetDao, authors)) 
+			if(DataAccessObject.compare(targetDao, authors)) // if the target Dao is authors...
 			{
 				if("".equals(enteredFields[0])) 
 				{
@@ -228,7 +228,7 @@ public class Service
 				overwriteListWhereIndexZeroMatches(data, enteredFields);
 				targetDao.overwriteTable(data);
 			}
-			else if(DataAccessObject.compare(targetDao, publishers))
+			else if(DataAccessObject.compare(targetDao, publishers)) // if the target Dao is publishers...
 			{
 				if("".equals(enteredFields[0])) 
 				{
@@ -239,7 +239,7 @@ public class Service
 				overwriteListWhereIndexZeroMatches(data, enteredFields);
 				targetDao.overwriteTable(data);
 			}
-			else if(DataAccessObject.compare(targetDao, books)) 
+			else if(DataAccessObject.compare(targetDao, books)) // if the target Dao is books...
 			{
 				if("".equals(enteredFields[0])) 
 				{
@@ -251,7 +251,7 @@ public class Service
 				String targetBookCurrentAuthor = "";
 				String targetBookCurrentPublisher = ""; 
 				
-				// does the author exist? if so get the data needed to identify corresponding entries in Authors and Publishers
+				// does the book exist? if so get the data needed to identify corresponding entries in Authors and Publishers
 				if(targetBookData.size() == 1 && targetBookData.get(0).size() > 3) 
 				{
 					targetBookCurrentAuthor = targetBookData.get(0).get(1);
@@ -267,7 +267,7 @@ public class Service
 				ArrayList<ArrayList<String>>  targetBookAuthorsData = queryTable(authors.getTableName(), new String[] {enteredFields.length>1 ?  enteredFields[1] : targetBookCurrentAuthor});
 				
 				// when updating a book the new auhtorId must exist in Authors and have an authorId
-				if(!(targetBookAuthorsData.size() == 1 && targetBookAuthorsData.get(0).size() > 1)) 
+				if(!(targetBookAuthorsData.size() > 0 && targetBookAuthorsData.get(0).size() > 1)) 
 				{
 					System.out.println("No unique authorId row exists with authorId " + (enteredFields.length>1 ?  enteredFields[1] : targetBookCurrentAuthor) + " in Authors.\nNo operation was done.");
 					return;
@@ -277,7 +277,7 @@ public class Service
 				ArrayList<ArrayList<String>>  targetBookPublishersData = queryTable(publishers.getTableName(), new String[] {enteredFields.length>2 ?  enteredFields[2] : targetBookCurrentPublisher});
 				
 				// when updating a book the new publisherId must exist in Publishers
-				if(!(targetBookPublishersData.size() == 1 && targetBookPublishersData.get(0).size() > 1))
+				if(!(targetBookPublishersData.size() > 0 && targetBookPublishersData.get(0).size() > 1))
 				{
 					System.out.println("No unique publisherId row exists with publisherId " + (enteredFields.length>2 ?  enteredFields[2] : targetBookCurrentPublisher) + " in Publishers.\nNo operation was done.");
 					return;
