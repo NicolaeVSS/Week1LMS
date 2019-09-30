@@ -53,6 +53,12 @@ public class Main {
 			{
 			case "Create":
 				tableName = getTableSelection(op);
+				
+				if("Main".equals(tableName) || "Unknown".equals(tableName)) 
+				{
+					continue;
+				}
+				
 				System.out.println(library.getTableSchemas());
 				enteredFields = getFieldSelection(op);
 				
@@ -60,6 +66,12 @@ public class Main {
 				break;
 			case "Read":
 				tableName = getTableSelection(op);
+				
+				if("Main".equals(tableName) || "Unknown".equals(tableName)) 
+				{
+					continue;
+				}
+				
 				System.out.println(library.getTableSchemas());
 				enteredFields = getFieldSelection(op);
 				
@@ -67,6 +79,12 @@ public class Main {
 				break;
 			case "Update":
 				tableName = getTableSelection(op);
+				
+				if("Main".equals(tableName) || "Unknown".equals(tableName)) 
+				{
+					continue;
+				}
+				
 				System.out.println(library.getTableSchemas());
 				System.out.println("Note: Your first value will match to the primary key of " + tableName + " and the values overwrite the corresponding fields");
 				enteredFields = getFieldSelection(op);
@@ -75,6 +93,12 @@ public class Main {
 				break;
 			case "Delete":
 				tableName = getTableSelection(op);
+				
+				if("Main".equals(tableName) || "Unknown".equals(tableName)) 
+				{
+					continue;
+				}
+				
 				System.out.println(library.getTableSchemas());
 				System.out.println("Note: Only the first value sent will be considered. It must be the primary key of row you'd like to remove.");
 				enteredFields = getFieldSelection(op);
@@ -96,7 +120,7 @@ public class Main {
 		Scanner input = new Scanner(System.in);
 		
 		System.out.println("Which table would you like to do your " + op + " on?");
-		System.out.println("(A)uthors\n(P)ublishers\n(B)ooks\n");
+		System.out.println("(A)uthors\n(P)ublishers\n(B)ooks\n\n(M)ain Menue");
 		
 		String table = String.valueOf(Character.toUpperCase(input.next().charAt(0)));
 		
@@ -111,8 +135,10 @@ public class Main {
 		case "B":
 			table = "Books";
 			break;
+		case "M":
+			table = "Main";
 		default:
-			table = "unknown";
+			table = "Unknown";
 		}
 		
 		return table;
