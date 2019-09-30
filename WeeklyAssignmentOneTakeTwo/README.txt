@@ -1,6 +1,19 @@
 Nicolae Vasile
 nicolae.vasile@smoothstack.com
 
+/**************************************************************************/
+This project taught me about the three tier architecture. Additionally, I 
+also learned that asking as many questions at the start is critical to avoid
+having to re-write code. This project also cemented the differences between 
+interfaces and abstract classes in my mind.
+
+I learned that when doing CRUD, an entity object should be created and passed
+to the Service layer, I was using String arrays and hastily switched to POJOs
+on the day the asignment was due. See the usingstringarrays branch to see 
+that code.
+
+/**************************************************************************/
+
 when launching the program, it will attempt to find/create csv files in:
 WeeklyAssignments/WeeklyAssignmentOneTakeTwo/dbFiles
 
