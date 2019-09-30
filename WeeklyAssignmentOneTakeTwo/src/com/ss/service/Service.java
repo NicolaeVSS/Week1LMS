@@ -9,25 +9,10 @@ import com.ss.exception.ImproperDaoNameException;
 
 public class Service 
 {
-	// Service is a singleton
-	private static Service instance = null;
-	
-	private Service() {}
-	
-	public static Service getInstance() 
-	{
-		if(instance == null) 
-		{
-			instance = new Service();
-		}
-		
-		return instance;
-	}
-	
 	// MEMBER VARIABLES
-	private DataAccessObject authors = new DataAccessAuthors(new AuthorsTable());
-	private DataAccessObject publishers = new DataAccessPublishers(new PublishersTable());
-	private DataAccessObject books = new DataAccessBooks(new BooksTable());
+	private DataAccessObject authors = new DataAccessAuthors();
+	private DataAccessObject publishers = new DataAccessPublishers();
+	private DataAccessObject books = new DataAccessBooks();
 	
 	public String getTableSchemas() 
 	{
@@ -39,21 +24,23 @@ public class Service
 	//CREATE
 	//input[0] should be the target table's name
 	//input[1] corresponds to the second field (since field[0] is the primary key in any table)
-	public void addEntry(String tableName, String ...enteredFields) 
+	public void addEntry(String tableName, Entity newData) 
 	{
+		String[] enteredFields = newData.getFields();
+		
 		try 
 		{
 			DataAccessObject targetDao = identifyDao(tableName);
 			
-			if(DataAccessObject.compare(targetDao, authors)) 
+			if(newData instanceof AuthorsEntity) 
 			{
 				targetDao.appendToTable(ArrayUtils.addAll(new String[] {generateUniquePrimaryKey(targetDao)}, enteredFields));
 			}
-			else if(DataAccessObject.compare(targetDao, publishers))
+			else if(newData instanceof PublishersEntity)
 			{
 				targetDao.appendToTable(ArrayUtils.addAll(new String[] {generateUniquePrimaryKey(targetDao)}, enteredFields));
 			}
-			else if(DataAccessObject.compare(targetDao, books)) 
+			else if(newData instanceof BooksEntity) 
 			{
 				if(enteredFields.length < 2) 
 				{
@@ -61,7 +48,7 @@ public class Service
 					return;
 				}
 
-				ArrayList<ArrayList<String>> authorQueryResults = queryTable("Authors", new String[] {enteredFields[0]});
+				ArrayList<ArrayList<String>> authorQueryResults = queryTable("Authors", new AuthorsEntity(enteredFields[0]));
 				
 				// there must be one entry in Authors that matches the authorId passed in
 				// the empty string is not a valid authorId due to query's behavior intentionally matching the empty string to any value
@@ -71,7 +58,7 @@ public class Service
 					return;
 				}
 				
-				ArrayList<ArrayList<String>> publisherQueryResults = queryTable("Publishers", new String[] {enteredFields[1]});
+				ArrayList<ArrayList<String>> publisherQueryResults = queryTable("Publishers", new AuthorsEntity(enteredFields[1]));
 
 				// see comments on above if()
 				if(publisherQueryResults.size() != 1 || "".equals(enteredFields[1])) 
@@ -99,9 +86,10 @@ public class Service
 	// READ
 	// tableName should be the name of the table to be queried 
 	// enteredFields corresponds to that tables fields array, and checks if the values are the same in the data unless enteredFeild equals the empty string
-	public ArrayList<ArrayList<String>> queryTable(String tableName, String ...enteredFields) 
+	public ArrayList<ArrayList<String>> queryTable(String tableName, Entity queryData) 
 	{
 		ArrayList<ArrayList<String>> output = new ArrayList<ArrayList<String>>();
+		String[] enteredFields = queryData.getFields();
 		
 		try 
 		{
@@ -153,9 +141,10 @@ public class Service
 	
 	// see above comments for additional behaviour
 	// useComplement indicates whether to do Object.equals(Object o) or !Object.equals(Object o)
-	public ArrayList<ArrayList<String>> queryTableComplement(boolean useComplement, String tableName, String ...enteredFields) 
+	public ArrayList<ArrayList<String>> queryTableComplement(boolean useComplement, String tableName, Entity queryData) 
 	{
 		ArrayList<ArrayList<String>> output = new ArrayList<ArrayList<String>>();
+		String[] enteredFields = queryData.getFields();
 		
 		try 
 		{
@@ -209,15 +198,16 @@ public class Service
 	}
 	
 	// UPDATE
-	public void updateEntry(String tableName, String ...enteredFields) 
+	public void updateEntry(String tableName, Entity updateData) 
 	{
 		try 
 		{
+			String[] enteredFields = updateData.getFields();
+			
 			DataAccessObject targetDao = identifyDao(tableName); // this'll throw an exception if it cant resolve which DAO to use meaning tableName is safe to use for the rest oft he function 
 			ArrayList<ArrayList<String>> data = targetDao.getTableData();
 			
-			ArrayList<ArrayList<String>> queryResult;
-			if(DataAccessObject.compare(targetDao, authors)) // if the target Dao is authors...
+			if(updateData instanceof AuthorsEntity) // if the target Dao is authors...
 			{
 				if("".equals(enteredFields[0])) 
 				{
@@ -228,7 +218,7 @@ public class Service
 				overwriteListWhereIndexZeroMatches(data, enteredFields);
 				targetDao.overwriteTable(data);
 			}
-			else if(DataAccessObject.compare(targetDao, publishers)) // if the target Dao is publishers...
+			else if(updateData instanceof PublishersEntity) // if the target Dao is publishers...
 			{
 				if("".equals(enteredFields[0])) 
 				{
@@ -239,7 +229,7 @@ public class Service
 				overwriteListWhereIndexZeroMatches(data, enteredFields);
 				targetDao.overwriteTable(data);
 			}
-			else if(DataAccessObject.compare(targetDao, books)) // if the target Dao is books...
+			else if(updateData instanceof BooksEntity) // if the target Dao is books...
 			{
 				if("".equals(enteredFields[0])) 
 				{
@@ -247,7 +237,7 @@ public class Service
 					return;
 				}
 
-				ArrayList<ArrayList<String>>  targetBookData = queryTable(books.getTableName(), enteredFields[0]);
+				ArrayList<ArrayList<String>>  targetBookData = queryTable(books.getTableName(), new BooksEntity(enteredFields[0]));
 				String targetBookCurrentAuthor = "";
 				String targetBookCurrentPublisher = ""; 
 				
@@ -264,7 +254,7 @@ public class Service
 				}
 				
 				// get the corresponding data from Authors table
-				ArrayList<ArrayList<String>>  targetBookAuthorsData = queryTable(authors.getTableName(), new String[] {enteredFields.length>1 ?  enteredFields[1] : targetBookCurrentAuthor});
+				ArrayList<ArrayList<String>>  targetBookAuthorsData = queryTable(authors.getTableName(), new BooksEntity(enteredFields.length>1 ?  enteredFields[1] : targetBookCurrentAuthor));
 				
 				// when updating a book the new auhtorId must exist in Authors and have an authorId
 				if(!(targetBookAuthorsData.size() > 0 && targetBookAuthorsData.get(0).size() > 1)) 
@@ -274,7 +264,7 @@ public class Service
 				}
 				
 				// get corresponding data from publishers table
-				ArrayList<ArrayList<String>>  targetBookPublishersData = queryTable(publishers.getTableName(), new String[] {enteredFields.length>2 ?  enteredFields[2] : targetBookCurrentPublisher});
+				ArrayList<ArrayList<String>>  targetBookPublishersData = queryTable(publishers.getTableName(), new PublishersEntity(enteredFields.length>2 ?  enteredFields[2] : targetBookCurrentPublisher));
 				
 				// when updating a book the new publisherId must exist in Publishers
 				if(!(targetBookPublishersData.size() > 0 && targetBookPublishersData.get(0).size() > 1))
@@ -301,14 +291,16 @@ public class Service
 	}
 	
 	//DELETE
-	public void removeEntry(String tableName, String ...enteredFields) 
+	public void removeEntry(String tableName, Entity removeData) 
 	{
 		try 
 		{
+			String[] enteredFields = removeData.getFields();
+			
 			DataAccessObject targetDao = identifyDao(tableName); // this'll throw an exception if it cant resolve which DAO to use meaning tableName is safe to use for the rest oft he function 
 			ArrayList<ArrayList<String>> queryResult; // acts as a temporary variable to make debugging easier.
 			
-			if(DataAccessObject.compare(targetDao, authors)) 
+			if(removeData instanceof AuthorsEntity) 
 			{
 				if("".equals(enteredFields[0])) 
 				{
@@ -318,14 +310,14 @@ public class Service
 				
 				// When deleting an author, also delete all the books with matching authorId
 				// sending empty string since the first field is the bookId and THEN authorId
-				queryResult = queryTableComplement(true, "Books", new String[] {"",enteredFields[0]});
+				queryResult = queryTableComplement(true, "Books", new BooksEntity("",enteredFields[0]));
 				books.overwriteTable(queryResult);
 
 				// Then delete the entry in the Authors table
-				queryResult = queryTableComplement(true, tableName, enteredFields[0]);
+				queryResult = queryTableComplement(true, "Authors", new AuthorsEntity(enteredFields[0]));
 				targetDao.overwriteTable(queryResult);
 			}
-			else if(DataAccessObject.compare(targetDao, publishers))
+			else if(removeData instanceof PublishersEntity)
 			{
 				if("".equals(enteredFields[0])) 
 				{
@@ -335,14 +327,14 @@ public class Service
 				
 				// When deleting a publisher, also delete all the books with matching publisherId
 				// sending empty strings since the first field is the bookId and authorId and THEN publisherId
-				queryResult = queryTableComplement(true, "Books", new String[] {"","",enteredFields[0]});
+				queryResult = queryTableComplement(true, "Books", new BooksEntity("","",enteredFields[0]));
 				books.overwriteTable(queryResult);
 				
 				// Then delete the entry in the Publishers table
-				queryResult = queryTableComplement(true, tableName, enteredFields[0]);
+				queryResult = queryTableComplement(true, "Publishers", new PublishersEntity(enteredFields[0]));
 				targetDao.overwriteTable(queryResult);
 			}
-			else if(DataAccessObject.compare(targetDao, books)) 
+			else if(removeData instanceof BooksEntity) 
 			{
 				if("".equals(enteredFields[0])) 
 				{
@@ -351,7 +343,7 @@ public class Service
 				}
 
 				// When deleting a book,no need to delete the author or publisher
-				queryResult = queryTableComplement(true, tableName, new String[] {enteredFields[0]});
+				queryResult = queryTableComplement(true, "Books", new BooksEntity(enteredFields[0]));
 				targetDao.overwriteTable(queryResult);
 			}
 		} 
@@ -396,6 +388,16 @@ public class Service
 		//String line;
 		
 		// TODO use streams?
+		
+//		data.stream().forEach(row -> 
+//		{
+//			if(row.size() > 0 && !"".equals(row.get(0))) 
+//			{
+//				keys.add(Integer.parseInt(row.get(0)));
+//			}
+//		});
+		
+		
 		for(int i = 0; i < data.size(); ++i) 
 		{
 			if("".equals(data.get(i).get(0))) 
@@ -418,6 +420,8 @@ public class Service
 		return String.valueOf(newKey);
 	}
 	
+	// matches the string with the name of a dao
+	// TODO maybe use an enum instead of string literals
 	private DataAccessObject identifyDao(String tableName) throws ImproperDaoNameException 
 	{
 		DataAccessObject targetDAO;
@@ -453,7 +457,7 @@ public class Service
 		return false;
 	}
 
-	// returns a string representation of a 2d array
+	// returns a string representation of a 2d array, with brackets
 	public static String make2DArrayListLegible(ArrayList<ArrayList<String>> input) 
 	{	
 		StringBuilder output = new StringBuilder();

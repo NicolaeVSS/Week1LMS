@@ -2,41 +2,60 @@ package com.ss.dataaccess;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.stream.Collectors;
 
-import com.ss.dataobjects.Table;
+import com.ss.dataobjects.Entity;
 import com.ss.exception.ImproperDaoNameException;
 
 public abstract class DataAccessObject 
 {
-	protected Table myTable;
+	protected Entity myTable;
+	protected String[] fields;
+	protected String tableName;
+	protected String filePath;
+	protected File table;
 	
-	public DataAccessObject(Table myTable) 
-	{
-		this.myTable = myTable;
-	}
 	
-	public static boolean compare(DataAccessObject one, DataAccessObject two) 
+	public DataAccessObject(String[] fields, String tableName , String filePath) 
 	{
-		if(one.myTable.getTableName().equals(two.myTable.getTableName()) ) 
-		{
-			return true;
+		this.fields = fields;
+		this.tableName = tableName;
+		this.filePath = filePath;
+		this.table = new File(this.filePath);
+		
+		try
+		{	
+			boolean isFileCreated = table.createNewFile();
+			
+			if(isFileCreated) 
+			{
+				System.out.println("File for " + tableName + " successfully created at " + table.getCanonicalPath());
+			}
+			else 
+			{
+				System.out.println("File for " + tableName +" already exists at " + table.getCanonicalPath());
+			}
 		}
-		return false;
+		catch (IOException e)
+		{
+			System.out.println("Something went wrong creating the file for " + tableName + " at "+ this.filePath);
+			e.printStackTrace();
+			return;
+		}
 	}
-	
+
 	// CREATE
 	public void appendToTable(String ...enteredFields) throws ImproperDaoNameException, IOException 
 	{
-		BufferedWriter writer = new BufferedWriter(new FileWriter(myTable.getFilePath(), true));
+		BufferedWriter writer = new BufferedWriter(new FileWriter(filePath,true));
 		String data = "";
 		
-		for(int i = 0; i < Math.min(enteredFields.length, myTable.getFields().length); ++i) 
+		for(int i = 0; i < Math.min(enteredFields.length, this.fields.length); ++i) 
 		{
 			data += enteredFields[i] + ",";
 		}
@@ -55,7 +74,7 @@ public abstract class DataAccessObject
 	{
 		ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
 		
-		BufferedReader reader = new BufferedReader(new FileReader(myTable.getFilePath()));
+		BufferedReader reader = new BufferedReader(new FileReader(this.filePath));
 		
 		// for each line of the file, use split(",") and cast to an ArrayList 
 		// AND THEN add that split/casted row to the data ArrayList to be returned
@@ -72,7 +91,7 @@ public abstract class DataAccessObject
 	public void overwriteTable(ArrayList<ArrayList<String>> data) throws ImproperDaoNameException, IOException 
 	{
 		// clear the file
-		myTable.clearTable();
+		clearTable();
 		
 		// if the user requested to just empty the table, might as well stop here
 		if(data.size() == 0) 
@@ -86,13 +105,22 @@ public abstract class DataAccessObject
 		}
 	}
 
+	public void clearTable() throws IOException 
+	{
+		// TODO consider making a backup copy of the file
+		if(table.delete())
+		{
+		    table.createNewFile();
+		}
+	}
+	
 	public String getTableName() 
 	{
-		return myTable.getTableName();
+		return tableName;
 	}
 	
 	public String getTableSchema() 
 	{
-		return myTable.getTableName()+ ":\t" + Arrays.toString(myTable.getFields());
+		return tableName + ":\t" + Arrays.toString(fields);
 	}
 }

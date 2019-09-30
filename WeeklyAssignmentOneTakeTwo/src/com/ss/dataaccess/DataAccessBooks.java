@@ -2,18 +2,23 @@ package com.ss.dataaccess;
 
 import java.util.Arrays;
 
-import com.ss.dataobjects.Table;
+import com.ss.dataobjects.Entity;
 
 public class DataAccessBooks extends DataAccessObject
 {
-
-	public DataAccessBooks(Table myTable) {
-		super(myTable);
+	public DataAccessBooks() 
+	{
+		super(new String[] {"bookId","authorId","publisherId","bookTitle"},"Books","./dbFiles/Books.csv");
 	}
 	
-	@Override
-	public String getTableSchema() 
+	public DataAccessBooks(String filePath) 
 	{
-		return myTable.getTableName()+ ":\t\t" + Arrays.toString(myTable.getFields());
+		super(new String[] {"bookId","authorId","publisherId","bookTitle"},"Books",filePath);
 	}
+	
+//	@Override
+//	public String getTableSchema() 
+//	{
+//		return myTable.getTableName()+ ":\t\t" + Arrays.toString(myTable.getFields());
+//	}
 }

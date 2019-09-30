@@ -1,17 +1,22 @@
 import java.util.*;
 
+import com.ss.dataobjects.AuthorsEntity;
+import com.ss.dataobjects.BooksEntity;
+import com.ss.dataobjects.Entity;
+import com.ss.dataobjects.PublishersEntity;
 import com.ss.service.Service;
 
 public class Main {
 
 	public static void main(String[] args) 
 	{
-		Service library = Service.getInstance();
+		Service library = new Service();
 		Scanner input = new Scanner(System.in);
 		
 		String op; // stores the user's desired operation
 		String tableName; // stores the user's target for the desired operation
 		String[] enteredFields; // stores the user's field values to check against in the target table
+		Entity selectedEntity;
 		
 		/*
 		// FOR DEBUGGING
@@ -61,8 +66,9 @@ public class Main {
 				
 				System.out.println(library.getTableSchemas());
 				enteredFields = getFieldSelection(op);
+				selectedEntity = craftEntity(tableName, enteredFields);
 				
-				library.addEntry(tableName, enteredFields);
+				library.addEntry(tableName, selectedEntity);
 				break;
 			case "Read":
 				tableName = getTableSelection(op);
@@ -74,8 +80,9 @@ public class Main {
 				
 				System.out.println(library.getTableSchemas());
 				enteredFields = getFieldSelection(op);
+				selectedEntity = craftEntity(tableName, enteredFields);
 				
-				System.out.println(Service.make2DArrayListLegible(library.queryTable(tableName, enteredFields)));
+				System.out.println(Service.make2DArrayListLegible(library.queryTable(tableName, selectedEntity)));
 				break;
 			case "Update":
 				tableName = getTableSelection(op);
@@ -88,8 +95,9 @@ public class Main {
 				System.out.println(library.getTableSchemas());
 				System.out.println("Note: Your first value will match to the primary key of " + tableName + " and the values overwrite the corresponding fields");
 				enteredFields = getFieldSelection(op);
+				selectedEntity = craftEntity(tableName, enteredFields);
 				
-				library.updateEntry(tableName, enteredFields);
+				library.updateEntry(tableName, selectedEntity);
 				break;
 			case "Delete":
 				tableName = getTableSelection(op);
@@ -102,8 +110,9 @@ public class Main {
 				System.out.println(library.getTableSchemas());
 				System.out.println("Note: Only the first value sent will be considered. It must be the primary key of row you'd like to remove.");
 				enteredFields = getFieldSelection(op);
+				selectedEntity = craftEntity(tableName, enteredFields);
 				
-				library.removeEntry(tableName, enteredFields);
+				library.removeEntry(tableName, selectedEntity);
 				break;
 			case "Quit":
 				return;
@@ -115,6 +124,21 @@ public class Main {
 		while(true);
 	}
 	
+	private static Entity craftEntity(String tableName, String[] enteredFields) {
+		
+		switch(tableName) 
+		{
+		case "Authors":
+			return new AuthorsEntity(enteredFields);
+		case "Publishers":
+			return new PublishersEntity(enteredFields);
+		case "Books":
+			return new BooksEntity(enteredFields);
+		default:
+			return null;
+		}
+	}
+
 	public static String getTableSelection(String op) 
 	{
 		Scanner input = new Scanner(System.in);

@@ -29,7 +29,7 @@ class DataAccessObjectTest
 	@Test 
 	final void testAppendToTableAuthorDao() throws ImproperDaoNameException, IOException 
 	{
-		DataAccessObject myDao = new DataAccessAuthors(new AuthorsTable("./dbFilesTest/Authors.csv"));
+		DataAccessObject myDao = new DataAccessAuthors("./dbFilesTest/Authors.csv");
 		String[] authorData = new String[] {"1","testAppendToTableAuthorDaoAuthorName"};
 		ArrayList<ArrayList<String>> result;
 
@@ -43,14 +43,10 @@ class DataAccessObjectTest
 			{
 				continue;
 			}
-			
+
 			for(int j = 0; j < authorData.length; ++j) 
 			{
-				if (Arrays.equals(result.get(i).toArray(), authorData)) 
-				{
-					// success!
-					return;
-				}
+				assertEquals(result.get(i),new ArrayList<String>( Arrays.asList(authorData)));
 			}
 		}
 
@@ -60,7 +56,7 @@ class DataAccessObjectTest
 	@Test
 	final void testOverwriteTable() throws IOException, ImproperDaoNameException 
 	{
-		DataAccessObject myDao = new DataAccessAuthors(new AuthorsTable("./dbFilesTest/Authors.csv"));
+		DataAccessObject myDao = new DataAccessAuthors("./dbFilesTest/Authors.csv");
 		ArrayList<ArrayList<String>> previousData = myDao.getTableData();
 
 		// create an arraylist containing what we want to overwrite the file with
@@ -71,14 +67,6 @@ class DataAccessObjectTest
 		// get all the data in the file after the overwrite and compare
 		ArrayList<ArrayList<String>> newData = myDao.getTableData();
 		
-		
-		if(overwriteData.equals(newData)) 
-		{
-			// success!
-			myDao.overwriteTable(previousData);
-			return;
-		}
-		// else:
-		fail("Overwritten data didnt match what was sent");
+		assertEquals(overwriteData, newData);
 	}
 }
